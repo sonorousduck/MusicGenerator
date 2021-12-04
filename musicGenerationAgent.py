@@ -95,7 +95,7 @@ def create_network(network_input, n_vocab):
     return model
 
 def train(model, network_input, network_output):
-    filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
+    filepath = "weights/weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
     checkpoint = ModelCheckpoint(
         filepath,
         monitor='loss',
@@ -106,8 +106,8 @@ def train(model, network_input, network_output):
 
     callbacks_list = [checkpoint]
 
-    model.fit(network_input, network_output, epochs=1000, batch_size=128, callbacks=callbacks_list)
-
+    model.fit(network_input, network_output, epochs=2000, batch_size=128, callbacks=callbacks_list)
+    model.save('weights.hdf5')
 
 if __name__ == "__main__":
     # get_notes()
