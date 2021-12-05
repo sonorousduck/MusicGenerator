@@ -32,8 +32,8 @@ def prepare_sequences(notes, pitchnames, n_vocab):
 
 def create_network(network_input, n_vocab):
     model = Sequential()
-    model.add(LSTM(128, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True))
-    model.add(LSTM(256, return_sequences=True))
+    model.add(LSTM(128, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True, recurrent_dropout=0.25))
+    model.add(LSTM(256, return_sequences=True, recurrent_dropout=0.25))
     model.add(LSTM(512))
     model.add(Dropout(0.15))
     model.add(Dense(1024, activation="relu"))
@@ -117,7 +117,7 @@ def generate():
     # Get all pitch names
     n_vocab = len(set(notes))
 
-    for i in range(5):
+    for i in range(15):
 
         network_input, normalized_input = prepare_sequences(notes, pitchnames, n_vocab)
         model = create_network(normalized_input, n_vocab)
