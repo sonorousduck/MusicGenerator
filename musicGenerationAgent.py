@@ -55,11 +55,11 @@ def train_network():
 def get_notes():
     notes = []
 
-    for file in glob.glob("music/*.midi"):
+    for file in glob.glob("music/*.mid"):
         midi = converter.parse(file)
 
 
-        try: # This is if the file has instrument parts
+        try:  # This is if the file has instrument parts
             s2 = instrument.partitionByInstrument(midi)
             notes_to_parse = s2.parts[0].recurse()
         except:
@@ -75,19 +75,18 @@ def get_notes():
         with open('data/notes', 'wb') as filepath:
             pickle.dump(notes, filepath)
 
-        return notes
+    return notes
 
 
 
 def create_network(network_input, n_vocab):
     model = Sequential()
-    model.add(LSTM(512, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True))
+    model.add(LSTM(128, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True, recurrent_dropout=0.25))
+    model.add(LSTM(256, return_sequences=True, recurrent_dropout=0.25))
     model.add(LSTM(512))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
-    model.add(Dense(256, activation="relu"))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.15))
+    model.add(Dense(1024, activation="relu"))
+    model.add(Dropout(0.15))
     model.add(Dense(512, activation="relu"))
     model.add(Dense(n_vocab, activation="softmax"))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
@@ -106,7 +105,7 @@ def train(model, network_input, network_output):
 
     callbacks_list = [checkpoint]
 
-    model.fit(network_input, network_output, epochs=2000, batch_size=128, callbacks=callbacks_list)
+    model.fit(network_input, network_output, epochs=500, batch_size=128, callbacks=callbacks_list)
     model.save('weights.hdf5')
 
 if __name__ == "__main__":

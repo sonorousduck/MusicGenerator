@@ -32,19 +32,18 @@ def prepare_sequences(notes, pitchnames, n_vocab):
 
 def create_network(network_input, n_vocab):
     model = Sequential()
-    model.add(LSTM(512, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True))
+    model.add(LSTM(128, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True, recurrent_dropout=0.25))
+    model.add(LSTM(256, return_sequences=True, recurrent_dropout=0.25))
     model.add(LSTM(512))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
-    model.add(Dense(256, activation="relu"))
-    model.add(BatchNormalization())
-    model.add(Dropout(0.3))
+    model.add(Dropout(0.15))
+    model.add(Dense(1024, activation="relu"))
+    model.add(Dropout(0.15))
     model.add(Dense(512, activation="relu"))
     model.add(Dense(n_vocab, activation="softmax"))
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
     model.summary()
 
-    model.load_weights('weights1846.hdf5')
+    model.load_weights('weights.hdf5')
 
     return model
 
@@ -59,7 +58,7 @@ def create_midi(prediction_output):
             notes = []
             for current_note in notes_in_chord:
                 new_note = note.Note(int(current_note))
-                new_note.storedInstrument = instrument.Ocarina()  # Generates piano midi
+                new_note.storedInstrument = instrument.Piano()  # Generates piano midi
                 notes.append(new_note)
             new_chord = chord.Chord(notes)
             new_chord.offset = offset
@@ -68,7 +67,7 @@ def create_midi(prediction_output):
         else:
             new_note = note.Note(pattern)
             new_note.offset = offset
-            new_note.storedInstrument = instrument.Ocarina() # Generates piano music
+            new_note.storedInstrument = instrument.Piano() # Generates piano music
             output_notes.append(new_note)
 
         offset += 0.5
