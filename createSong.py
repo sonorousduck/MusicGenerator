@@ -32,8 +32,8 @@ def prepare_sequences(notes, pitchnames, n_vocab):
 
 def create_network(network_input, n_vocab):
     model = Sequential()
-    model.add(LSTM(128, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True, recurrent_dropout=0.25))
-    model.add(LSTM(256, return_sequences=True, recurrent_dropout=0.25))
+    model.add(LSTM(128, input_shape=(network_input.shape[1], network_input.shape[2]), return_sequences=True))
+    model.add(LSTM(256, return_sequences=True))
     model.add(LSTM(512))
     model.add(Dropout(0.15))
     model.add(Dense(1024, activation="relu"))
@@ -43,11 +43,11 @@ def create_network(network_input, n_vocab):
     model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
     model.summary()
 
-    model.load_weights('weights.hdf5')
+    model.load_weights('weights193.hdf5')
 
     return model
 
-def create_midi(prediction_output):
+def create_midi(prediction_output, i):
     offset = 0
     output_notes = []
 
@@ -74,7 +74,7 @@ def create_midi(prediction_output):
 
         midi_stream = stream.Stream(output_notes)
 
-        midi_stream.write('midi', fp="test_output.mid")
+        midi_stream.write('midi', fp=f"test{i}.mid")
 
 
 def generate_notes(model, network_input, pitchnames, n_vocab):
@@ -117,10 +117,12 @@ def generate():
     # Get all pitch names
     n_vocab = len(set(notes))
 
-    network_input, normalized_input = prepare_sequences(notes, pitchnames, n_vocab)
-    model = create_network(normalized_input, n_vocab)
-    prediction_output = generate_notes(model, network_input, pitchnames, n_vocab)
-    create_midi(prediction_output)
+    for i in range(5):
+
+        network_input, normalized_input = prepare_sequences(notes, pitchnames, n_vocab)
+        model = create_network(normalized_input, n_vocab)
+        prediction_output = generate_notes(model, network_input, pitchnames, n_vocab)
+        create_midi(prediction_output, i)
 
 
 if __name__ == "__main__":
